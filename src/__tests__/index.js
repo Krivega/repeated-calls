@@ -16,7 +16,7 @@ describe('repeatedCalls', () => {
   it('not full params: targetFunction', () => {
     expect.assertions(1);
 
-    return repeatedCalls({}).catch(error => {
+    return repeatedCalls({}).catch((error) => {
       expect(error.message).toBe('targetFunction is required');
     });
   });
@@ -24,7 +24,7 @@ describe('repeatedCalls', () => {
   it('not full params: isComplette', () => {
     expect.assertions(1);
 
-    return repeatedCalls({ targetFunction }).catch(error => {
+    return repeatedCalls({ targetFunction }).catch((error) => {
       expect(error.message).toBe('isComplette is required');
     });
   });
@@ -42,9 +42,9 @@ describe('repeatedCalls', () => {
   it('calls end after 1', () => {
     expect.assertions(2);
 
-    const isComplette = callCount => callCount === 1;
+    const isComplette = (callCount) => callCount === 1;
 
-    return repeatedCalls({ targetFunction, isComplette }).then(callCount => {
+    return repeatedCalls({ targetFunction, isComplette }).then((callCount) => {
       expect(callCount).toBe(1);
       expect(targetFunction).toHaveBeenCalledTimes(1);
     });
@@ -53,9 +53,9 @@ describe('repeatedCalls', () => {
   it('calls end after 3', () => {
     expect.assertions(2);
 
-    const isComplette = callCount => callCount === 3;
+    const isComplette = (callCount) => callCount === 3;
 
-    return repeatedCalls({ targetFunction, isComplette }).then(callCount => {
+    return repeatedCalls({ targetFunction, isComplette }).then((callCount) => {
       expect(callCount).toBe(3);
       expect(targetFunction).toHaveBeenCalledTimes(3);
     });
@@ -64,10 +64,10 @@ describe('repeatedCalls', () => {
   it('complete if the limit is reached', () => {
     expect.assertions(2);
 
-    const isComplette = callCount => callCount === 5;
+    const isComplette = (callCount) => callCount === 5;
     const callLimit = 3;
 
-    return repeatedCalls({ targetFunction, isComplette, callLimit }).catch(error => {
+    return repeatedCalls({ targetFunction, isComplette, callLimit }).catch((error) => {
       expect(error.message).toBe(`call limit (${callLimit}) is reached`);
       expect(targetFunction).toHaveBeenCalledTimes(3);
     });
