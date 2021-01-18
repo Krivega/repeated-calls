@@ -72,4 +72,40 @@ describe('repeatedCalls', () => {
       expect(targetFunction).toHaveBeenCalledTimes(3);
     });
   });
+
+  it('delay', () => {
+    expect.assertions(2);
+
+    const numberCalls = 4;
+    const isComplete = (callCount) => callCount === numberCalls;
+    const timeStarted = Date.now();
+    const delay = 500;
+    const timePassedMin = delay * (numberCalls - 1);
+    const timePassedMax = delay * numberCalls;
+
+    return repeatedCalls({ targetFunction, isComplete, delay }).then(() => {
+      const timeEnded = Date.now();
+      const timePassed = timeEnded - timeStarted;
+
+      expect(timePassed).toBeLessThanOrEqual(timePassedMax);
+      expect(timePassed).toBeGreaterThanOrEqual(timePassedMin);
+    });
+  });
+
+  it('delay 0', () => {
+    expect.assertions(1);
+
+    const numberCalls = 4;
+    const isComplete = (callCount) => callCount === numberCalls;
+    const timeStarted = Date.now();
+    const delay = 0;
+    const timePassedMax = 10;
+
+    return repeatedCalls({ targetFunction, isComplete, delay }).then(() => {
+      const timeEnded = Date.now();
+      const timePassed = timeEnded - timeStarted;
+
+      expect(timePassed).toBeLessThanOrEqual(timePassedMax);
+    });
+  });
 });
