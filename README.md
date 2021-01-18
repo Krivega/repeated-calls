@@ -34,9 +34,9 @@ const targetFunction = function innerTargetFunction() {
 
   return innerTargetFunction.count;
 };
-const isComplette = callCount => callCount === 3;
+const isComplete = (callCount) => callCount === 3;
 
-return repeatedCalls({ targetFunction, isComplette }).then(callCount => {
+return repeatedCalls({ targetFunction, isComplete }).then((callCount) => {
   console.log(callCount); // 3
 });
 ```
@@ -53,10 +53,10 @@ const targetFunction = function innerTargetFunction() {
 
   return innerTargetFunction.count;
 };
-const isComplette = callCount => callCount === 3;
+const isComplete = (callCount) => callCount === 3;
 const callLimit = 3;
 
-return repeatedCalls({ targetFunction, isComplette, callLimit }).catch(error => {
+return repeatedCalls({ targetFunction, isComplete, callLimit }).catch((error) => {
   console.log(error); // call limit (3) is reached
 });
 ```

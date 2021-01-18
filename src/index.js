@@ -1,14 +1,14 @@
-const repeatedCalls = ({ targetFunction, isComplette, callLimit = Infinity, delay = 300 }) =>
+const repeatedCalls = ({ targetFunction, isComplete, callLimit = Infinity, delay = 300 }) =>
   new Promise((resolve, reject) => {
     if (!targetFunction) {
       return reject(new Error('targetFunction is required'));
     }
 
-    if (!isComplette) {
-      return reject(new Error('isComplette is required'));
+    if (!isComplete) {
+      return reject(new Error('isComplete is required'));
     }
 
-    if (isComplette()) {
+    if (isComplete()) {
       return resolve();
     }
 
@@ -17,7 +17,7 @@ const repeatedCalls = ({ targetFunction, isComplette, callLimit = Infinity, dela
     const checkEnded = () => {
       clearTimeout(timeout);
 
-      if (isComplette()) {
+      if (isComplete()) {
         return resolve();
       }
 
@@ -29,7 +29,7 @@ const repeatedCalls = ({ targetFunction, isComplette, callLimit = Infinity, dela
 
       countCalls += 1;
 
-      if (isComplette(result)) {
+      if (isComplete(result)) {
         return resolve(result);
       }
 
