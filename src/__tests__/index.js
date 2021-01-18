@@ -99,7 +99,7 @@ describe('repeatedCalls', () => {
     const isComplete = (callCount) => callCount === numberCalls;
     const timeStarted = Date.now();
     const delay = 0;
-    const timePassedMax = 10;
+    const timePassedMax = 1;
 
     return repeatedCalls({ targetFunction, isComplete, delay }).then(() => {
       const timeEnded = Date.now();

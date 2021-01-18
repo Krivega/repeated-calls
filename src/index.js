@@ -33,7 +33,11 @@ const repeatedCalls = ({ targetFunction, isComplete, callLimit = Infinity, delay
         return resolve(result);
       }
 
-      timeout = setTimeout(checkEnded, delay);
+      if (delay && delay > 0) {
+        timeout = setTimeout(checkEnded, delay);
+      } else {
+        checkEnded();
+      }
 
       return undefined;
     };
