@@ -61,6 +61,25 @@ return repeatedCalls({ targetFunction, isComplete, callLimit }).catch((error) =>
 });
 ```
 
+### Use async targetFunction
+
+```js
+import { repeatedCallsAsync } from 'repeated-calls';
+
+const targetFunction = function innerTargetFunction() {
+  innerTargetFunction.count = innerTargetFunction.count || 0;
+
+  innerTargetFunction.count += 1;
+
+  return Promise.resolve(innerTargetFunction.count);
+};
+const isComplete = (callCount) => callCount === 3;
+
+return repeatedCalls({ targetFunction, isComplete }).then((callCount) => {
+  console.log(callCount); // 3
+});
+```
+
 ## Run tests
 
 ```sh
@@ -71,7 +90,7 @@ npm test
 
 **Krivega Dmitriy**
 
-- Website: https://krivega.com
+- Website: <https://krivega.com>
 - Github: [@Krivega](https://github.com/Krivega)
 
 ## Contributing

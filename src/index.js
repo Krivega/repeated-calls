@@ -1,50 +1,103 @@
-const repeatedCalls = ({ targetFunction, isComplete, callLimit = Infinity, delay = 300 }) =>
-  new Promise((resolve, reject) => {
-    if (!targetFunction) {
-      return reject(new Error('targetFunction is required'));
-    }
+const validateParams = ({ targetFunction, isComplete }) => {
+  if (!targetFunction) {
+    return { valid: false, error: new Error('targetFunction is required') };
+  }
 
-    if (!isComplete) {
-      return reject(new Error('isComplete is required'));
-    }
+  if (!isComplete) {
+    return { valid: false, error: new Error('isComplete is required') };
+  }
+
+  return { valid: true };
+};
+
+const promisedCall = (checkEnded) =>
+  new Promise((resolve, reject) => {
+    checkEnded({ resolve, reject });
+  });
+
+const repeatedCallsSync = ({ targetFunction, isComplete, callLimit = Infinity, delay = 300 }) => {
+  const validation = validateParams({ targetFunction, isComplete });
+
+  if (!validation.valid) {
+    return Promise.reject(validation.error);
+  }
+
+  let timeout;
+  let countCalls = 0;
+  const checkEnded = ({ resolve, reject }) => {
+    clearTimeout(timeout);
 
     if (isComplete()) {
       return resolve();
     }
 
-    let timeout;
-    let countCalls = 0;
-    const checkEnded = () => {
-      clearTimeout(timeout);
+    if (countCalls >= callLimit) {
+      return reject(new Error(`call limit (${callLimit}) is reached`));
+    }
 
-      if (isComplete()) {
-        return resolve();
-      }
+    const result = targetFunction();
 
-      if (countCalls >= callLimit) {
-        return reject(new Error(`call limit (${callLimit}) is reached`));
-      }
+    countCalls += 1;
 
-      const result = targetFunction();
+    if (isComplete(result)) {
+      return resolve(result);
+    }
 
-      countCalls += 1;
-
-      if (isComplete(result)) {
-        return resolve(result);
-      }
-
-      if (delay && delay > 0) {
-        timeout = setTimeout(checkEnded, delay);
-      } else {
-        checkEnded();
-      }
-
-      return undefined;
-    };
-
-    checkEnded();
+    if (delay && delay > 0) {
+      timeout = setTimeout(() => checkEnded({ resolve, reject }), delay);
+    } else {
+      checkEnded({ resolve, reject });
+    }
 
     return undefined;
-  });
+  };
 
-export default repeatedCalls;
+  return promisedCall(checkEnded);
+};
+
+export const repeatedCallsAsync = ({
+  targetFunction,
+  isComplete,
+  callLimit = Infinity,
+  delay = 300,
+}) => {
+  const validation = validateParams({ targetFunction, isComplete });
+
+  if (!validation.valid) {
+    return Promise.reject(validation.error);
+  }
+
+  let timeout;
+  let countCalls = 0;
+  const checkEnded = async ({ resolve, reject }) => {
+    clearTimeout(timeout);
+
+    if (isComplete()) {
+      return resolve();
+    }
+
+    if (countCalls >= callLimit) {
+      return reject(new Error(`call limit (${callLimit}) is reached`));
+    }
+
+    const result = await targetFunction();
+
+    countCalls += 1;
+
+    if (isComplete(result)) {
+      return resolve(result);
+    }
+
+    if (delay && delay > 0) {
+      timeout = setTimeout(() => checkEnded({ resolve, reject }), delay);
+    } else {
+      checkEnded({ resolve, reject });
+    }
+
+    return undefined;
+  };
+
+  return promisedCall(checkEnded);
+};
+
+export default repeatedCallsSync;
