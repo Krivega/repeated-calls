@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/Krivega/repeated-calls/compare/v1.1.0...v1.2.0) (2021-01-20)
+
+### Features
+
+- add isRejectAsValid for repeatedCallsAsync ([232f895](https://github.com/Krivega/repeated-calls/commit/232f895c677ec52ee97cc85627893f234e39796c))
+
 ## [1.1.0](https://github.com/Krivega/repeated-calls/compare/v1.0.0...v1.1.0) (2021-01-18)
 
 ### Features
