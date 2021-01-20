@@ -59,6 +59,7 @@ export const repeatedCallsAsync = ({
   targetFunction,
   isComplete,
   callLimit = Infinity,
+  isRejectAsValid = false,
   delay = 300,
 }) => {
   const validation = validateParams({ targetFunction, isComplete });
@@ -80,7 +81,17 @@ export const repeatedCallsAsync = ({
       return reject(new Error(`call limit (${callLimit}) is reached`));
     }
 
-    const result = await targetFunction();
+    let result;
+
+    try {
+      result = await targetFunction();
+    } catch (error) {
+      result = error;
+
+      if (!isRejectAsValid) {
+        return reject(error);
+      }
+    }
 
     countCalls += 1;
 

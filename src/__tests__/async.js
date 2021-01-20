@@ -2,6 +2,7 @@ import { repeatedCallsAsync } from '../index';
 
 describe('repeatedCallsAsync', () => {
   let targetFunction;
+  let targetFunctionRejected;
 
   beforeEach(() => {
     targetFunction = jest.fn(function innerTargetFunction() {
@@ -10,6 +11,13 @@ describe('repeatedCallsAsync', () => {
       innerTargetFunction.count += 1;
 
       return Promise.resolve(innerTargetFunction.count);
+    });
+    targetFunctionRejected = jest.fn(function innerTargetFunction() {
+      innerTargetFunction.count = innerTargetFunction.count || 0;
+
+      innerTargetFunction.count += 1;
+
+      return Promise.reject(innerTargetFunction.count);
     });
   });
 
@@ -32,6 +40,34 @@ describe('repeatedCallsAsync', () => {
     return repeatedCallsAsync({ targetFunction, isComplete }).then((callCount) => {
       expect(callCount).toBe(3);
       expect(targetFunction).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  it('calls for rejected with isRejectAsValid=false (by default)', () => {
+    expect.assertions(2);
+
+    const isComplete = (callCount) => callCount === 3;
+
+    return repeatedCallsAsync({ isComplete, targetFunction: targetFunctionRejected }).catch(
+      (callCount) => {
+        expect(callCount).toBe(1);
+        expect(targetFunctionRejected).toHaveBeenCalledTimes(1);
+      }
+    );
+  });
+
+  it('calls for rejected with isRejectAsValid=true', () => {
+    expect.assertions(2);
+
+    const isComplete = (callCount) => callCount === 3;
+
+    return repeatedCallsAsync({
+      isComplete,
+      targetFunction: targetFunctionRejected,
+      isRejectAsValid: true,
+    }).then((callCount) => {
+      expect(callCount).toBe(3);
+      expect(targetFunctionRejected).toHaveBeenCalledTimes(3);
     });
   });
 
