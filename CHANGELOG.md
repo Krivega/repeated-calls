@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/Krivega/repeated-calls/compare/v1.2.0...v1.3.0) (2021-01-26)
+
+### Features
+
+- add function hasReachedLimitError ([a12902f](https://github.com/Krivega/repeated-calls/commit/a12902f4b880a051e8021591d95ff989d7cce5d7))
+
 ## [1.2.0](https://github.com/Krivega/repeated-calls/compare/v1.1.0...v1.2.0) (2021-01-20)
 
 ### Features
