@@ -1,4 +1,4 @@
-import { repeatedCallsAsync } from '../index';
+import { repeatedCallsAsync, hasReachedLimitError } from '../index';
 
 describe('repeatedCallsAsync', () => {
   let targetFunction;
@@ -104,6 +104,43 @@ describe('repeatedCallsAsync', () => {
       const timePassed = timeEnded - timeStarted;
 
       expect(timePassed).toBeLessThanOrEqual(timePassedMax);
+    });
+  });
+
+  it('complete if the limit is reached', () => {
+    expect.assertions(4);
+
+    const isComplete = (callCount) => callCount === 5;
+    const callLimit = 3;
+
+    return repeatedCallsAsync({
+      targetFunction,
+      isComplete,
+      callLimit,
+    }).catch((error) => {
+      expect(hasReachedLimitError(error)).toBe(true);
+      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
+      expect(error.values.lastResult).toBe(callLimit);
+      expect(targetFunction).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  it('complete if the limit is reached: for rejected with isRejectAsValid', () => {
+    expect.assertions(4);
+
+    const isComplete = (callCount) => callCount === 5;
+    const callLimit = 3;
+
+    return repeatedCallsAsync({
+      isComplete,
+      callLimit,
+      targetFunction: targetFunctionRejected,
+      isRejectAsValid: true,
+    }).catch((error) => {
+      expect(hasReachedLimitError(error)).toBe(true);
+      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
+      expect(error.values.lastResult).toBe(callLimit);
+      expect(targetFunctionRejected).toHaveBeenCalledTimes(3);
     });
   });
 });

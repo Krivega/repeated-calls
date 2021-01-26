@@ -38,16 +38,4 @@ describe('repeatedCalls: core', () => {
       expect(targetFunction).toHaveBeenCalledTimes(0);
     });
   });
-
-  it('complete if the limit is reached', () => {
-    expect.assertions(2);
-
-    const isComplete = (callCount) => callCount === 5;
-    const callLimit = 3;
-
-    return repeatedCalls({ targetFunction, isComplete, callLimit }).catch((error) => {
-      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
-      expect(targetFunction).toHaveBeenCalledTimes(3);
-    });
-  });
 });

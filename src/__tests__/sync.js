@@ -1,4 +1,4 @@
-import repeatedCalls from '../index';
+import repeatedCalls, { hasReachedLimitError } from '../index';
 
 describe('repeatedCalls', () => {
   let targetFunction;
@@ -68,6 +68,20 @@ describe('repeatedCalls', () => {
       const timePassed = timeEnded - timeStarted;
 
       expect(timePassed).toBeLessThanOrEqual(timePassedMax);
+    });
+  });
+
+  it('complete if the limit is reached', () => {
+    expect.assertions(4);
+
+    const isComplete = (callCount) => callCount === 5;
+    const callLimit = 3;
+
+    return repeatedCalls({ targetFunction, isComplete, callLimit }).catch((error) => {
+      expect(hasReachedLimitError(error)).toBe(true);
+      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
+      expect(error.values.lastResult).toBe(callLimit);
+      expect(targetFunction).toHaveBeenCalledTimes(3);
     });
   });
 });
