@@ -1,22 +1,25 @@
 import repeatedCalls from '../index';
 
 describe('repeatedCalls: core', () => {
-  let targetFunction;
+  let targetFunction: () => number;
 
   beforeEach(() => {
-    targetFunction = jest.fn(function innerTargetFunction() {
+    const innerTargetFunction: (() => number) & { count?: number } = () => {
       innerTargetFunction.count = innerTargetFunction.count || 0;
 
       innerTargetFunction.count += 1;
 
       return innerTargetFunction.count;
-    });
+    };
+
+    targetFunction = jest.fn(innerTargetFunction);
   });
 
   it('not full params: targetFunction', () => {
     expect.assertions(1);
 
-    return repeatedCalls({}).catch((error) => {
+    // @ts-ignore
+    return repeatedCalls<number>({}).catch((error) => {
       expect(error.message).toBe('targetFunction is required');
     });
   });
@@ -24,7 +27,8 @@ describe('repeatedCalls: core', () => {
   it('not full params: isComplete', () => {
     expect.assertions(1);
 
-    return repeatedCalls({ targetFunction }).catch((error) => {
+    // @ts-ignore
+    return repeatedCalls<number>({ targetFunction }).catch((error) => {
       expect(error.message).toBe('isComplete is required');
     });
   });
@@ -32,9 +36,11 @@ describe('repeatedCalls: core', () => {
   it('not called if isComplete returns true', () => {
     expect.assertions(1);
 
-    const isComplete = () => true;
+    const isComplete = () => {
+      return true;
+    };
 
-    return repeatedCalls({ targetFunction, isComplete }).then(() => {
+    return repeatedCalls<number>({ targetFunction, isComplete }).then(() => {
       expect(targetFunction).toHaveBeenCalledTimes(0);
     });
   });

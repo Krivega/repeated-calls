@@ -1,32 +1,37 @@
 import { repeatedCallsAsync, hasReachedLimitError } from '../index';
 
 describe('repeatedCallsAsync', () => {
-  let targetFunction;
-  let targetFunctionRejected;
+  let targetFunction: () => Promise<number>;
+  let targetFunctionRejected: () => Promise<number>;
 
   beforeEach(() => {
-    targetFunction = jest.fn(function innerTargetFunction() {
-      innerTargetFunction.count = innerTargetFunction.count || 0;
+    const innerTargetFunctionResolved: (() => Promise<number>) & { count?: number } = () => {
+      innerTargetFunctionResolved.count = innerTargetFunctionResolved.count || 0;
 
-      innerTargetFunction.count += 1;
+      innerTargetFunctionResolved.count += 1;
 
-      return Promise.resolve(innerTargetFunction.count);
-    });
-    targetFunctionRejected = jest.fn(function innerTargetFunction() {
-      innerTargetFunction.count = innerTargetFunction.count || 0;
+      return Promise.resolve<number>(innerTargetFunctionResolved.count);
+    };
+    const innerTargetFunctionRejected: (() => Promise<number>) & { count?: number } = () => {
+      innerTargetFunctionRejected.count = innerTargetFunctionRejected.count || 0;
 
-      innerTargetFunction.count += 1;
+      innerTargetFunctionRejected.count += 1;
 
-      return Promise.reject(innerTargetFunction.count);
-    });
+      return Promise.reject<number>(innerTargetFunctionRejected.count);
+    };
+
+    targetFunction = jest.fn(innerTargetFunctionResolved);
+    targetFunctionRejected = jest.fn(innerTargetFunctionRejected);
   });
 
   it('calls end after 1', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount) => callCount === 1;
+    const isComplete = (callCount?: number) => {
+      return callCount === 1;
+    };
 
-    return repeatedCallsAsync({ targetFunction, isComplete }).then((callCount) => {
+    return repeatedCallsAsync<number>({ targetFunction, isComplete }).then((callCount) => {
       expect(callCount).toBe(1);
       expect(targetFunction).toHaveBeenCalledTimes(1);
     });
@@ -35,9 +40,11 @@ describe('repeatedCallsAsync', () => {
   it('calls end after 3', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount) => callCount === 3;
+    const isComplete = (callCount?: number) => {
+      return callCount === 3;
+    };
 
-    return repeatedCallsAsync({ targetFunction, isComplete }).then((callCount) => {
+    return repeatedCallsAsync<number>({ targetFunction, isComplete }).then((callCount) => {
       expect(callCount).toBe(3);
       expect(targetFunction).toHaveBeenCalledTimes(3);
     });
@@ -46,9 +53,11 @@ describe('repeatedCallsAsync', () => {
   it('calls for rejected with isRejectAsValid=false (by default)', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount) => callCount === 3;
+    const isComplete = (callCount?: number) => {
+      return callCount === 3;
+    };
 
-    return repeatedCallsAsync({ isComplete, targetFunction: targetFunctionRejected }).catch(
+    return repeatedCallsAsync<number>({ isComplete, targetFunction: targetFunctionRejected }).catch(
       (callCount) => {
         expect(callCount).toBe(1);
         expect(targetFunctionRejected).toHaveBeenCalledTimes(1);
@@ -59,9 +68,11 @@ describe('repeatedCallsAsync', () => {
   it('calls for rejected with isRejectAsValid=true', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount) => callCount === 3;
+    const isComplete = (callCount?: number) => {
+      return callCount === 3;
+    };
 
-    return repeatedCallsAsync({
+    return repeatedCallsAsync<number>({
       isComplete,
       targetFunction: targetFunctionRejected,
       isRejectAsValid: true,
@@ -75,13 +86,16 @@ describe('repeatedCallsAsync', () => {
     expect.assertions(2);
 
     const numberCalls = 4;
-    const isComplete = (callCount) => callCount === numberCalls;
+
+    const isComplete = (callCount?: number) => {
+      return callCount === numberCalls;
+    };
     const timeStarted = Date.now();
     const delay = 500;
     const timePassedMin = delay * (numberCalls - 1);
     const timePassedMax = delay * numberCalls;
 
-    return repeatedCallsAsync({ targetFunction, isComplete, delay }).then(() => {
+    return repeatedCallsAsync<number>({ targetFunction, isComplete, delay }).then(() => {
       const timeEnded = Date.now();
       const timePassed = timeEnded - timeStarted;
 
@@ -94,12 +108,15 @@ describe('repeatedCallsAsync', () => {
     expect.assertions(1);
 
     const numberCalls = 4;
-    const isComplete = (callCount) => callCount === numberCalls;
+
+    const isComplete = (callCount?: number) => {
+      return callCount === numberCalls;
+    };
     const timeStarted = Date.now();
     const delay = 0;
     const timePassedMax = 1;
 
-    return repeatedCallsAsync({ targetFunction, isComplete, delay }).then(() => {
+    return repeatedCallsAsync<number>({ targetFunction, isComplete, delay }).then(() => {
       const timeEnded = Date.now();
       const timePassed = timeEnded - timeStarted;
 
@@ -110,10 +127,12 @@ describe('repeatedCallsAsync', () => {
   it('complete if the limit is reached', () => {
     expect.assertions(4);
 
-    const isComplete = (callCount) => callCount === 5;
+    const isComplete = (callCount?: number) => {
+      return callCount === 5;
+    };
     const callLimit = 3;
 
-    return repeatedCallsAsync({
+    return repeatedCallsAsync<number>({
       targetFunction,
       isComplete,
       callLimit,
@@ -128,10 +147,12 @@ describe('repeatedCallsAsync', () => {
   it('complete if the limit is reached: for rejected with isRejectAsValid', () => {
     expect.assertions(4);
 
-    const isComplete = (callCount) => callCount === 5;
+    const isComplete = (callCount?: number) => {
+      return callCount === 5;
+    };
     const callLimit = 3;
 
-    return repeatedCallsAsync({
+    return repeatedCallsAsync<number>({
       isComplete,
       callLimit,
       targetFunction: targetFunctionRejected,
