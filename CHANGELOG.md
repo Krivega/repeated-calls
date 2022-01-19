@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/Krivega/repeated-calls/compare/v1.3.1...v1.3.2) (2022-01-19)
+
+### Bug Fixes
+
+- types for repeatedCallsAsync ([0874551](https://github.com/Krivega/repeated-calls/commit/0874551076db788d3b9338c0b779e0467b60a139))
+
 ### [1.3.1](https://github.com/Krivega/repeated-calls/compare/v1.3.0...v1.3.1) (2022-01-18)
 
 ## [1.3.0](https://github.com/Krivega/repeated-calls/compare/v1.2.0...v1.3.0) (2021-01-26)
