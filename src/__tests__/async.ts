@@ -27,7 +27,7 @@ describe('repeatedCallsAsync', () => {
   it('calls end after 1', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 1;
     };
 
@@ -40,7 +40,7 @@ describe('repeatedCallsAsync', () => {
   it('calls end after 3', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 3;
     };
 
@@ -53,7 +53,7 @@ describe('repeatedCallsAsync', () => {
   it('calls for rejected with isRejectAsValid=false (by default)', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 3;
     };
 
@@ -68,7 +68,7 @@ describe('repeatedCallsAsync', () => {
   it('calls for rejected with isRejectAsValid=true', () => {
     expect.assertions(2);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 3;
     };
 
@@ -87,7 +87,7 @@ describe('repeatedCallsAsync', () => {
 
     const numberCalls = 4;
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === numberCalls;
     };
     const timeStarted = Date.now();
@@ -109,7 +109,7 @@ describe('repeatedCallsAsync', () => {
 
     const numberCalls = 4;
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === numberCalls;
     };
     const timeStarted = Date.now();
@@ -127,7 +127,7 @@ describe('repeatedCallsAsync', () => {
   it('complete if the limit is reached', () => {
     expect.assertions(4);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 5;
     };
     const callLimit = 3;
@@ -147,7 +147,7 @@ describe('repeatedCallsAsync', () => {
   it('complete if the limit is reached: for rejected with isRejectAsValid', () => {
     expect.assertions(4);
 
-    const isComplete = (callCount?: number) => {
+    const isComplete = (callCount?: number | Error) => {
       return callCount === 5;
     };
     const callLimit = 3;

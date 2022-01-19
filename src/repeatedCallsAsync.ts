@@ -1,7 +1,7 @@
 import { validateParams, createError, promisedCall } from './utils';
 import type { TTargetFunction, TIsComplete, TCheckEnded } from './utils';
 
-const repeatedCallsAsync = <T = any>({
+const repeatedCallsAsync = <T = any, E = Error>({
   targetFunction,
   isComplete,
   callLimit = Infinity,
@@ -9,11 +9,13 @@ const repeatedCallsAsync = <T = any>({
   delay = 300,
 }: {
   targetFunction: TTargetFunction<Promise<T>>;
-  isComplete: TIsComplete<T>;
+  isComplete: TIsComplete<T | E>;
   callLimit?: number;
   isRejectAsValid?: boolean;
   delay?: number;
 }) => {
+  type TResult = T | E;
+
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
@@ -22,7 +24,7 @@ const repeatedCallsAsync = <T = any>({
 
   let timeout: NodeJS.Timeout;
   let countCalls = 0;
-  const checkEnded: TCheckEnded<T> = async ({ resolve, reject, lastResult }) => {
+  const checkEnded: TCheckEnded<TResult> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
     if (isComplete()) {
@@ -33,12 +35,12 @@ const repeatedCallsAsync = <T = any>({
       return reject(createError(callLimit, lastResult));
     }
 
-    let result: T;
+    let result: TResult;
 
     try {
       result = await targetFunction();
     } catch (error) {
-      result = error as T;
+      result = error as E;
 
       if (!isRejectAsValid) {
         return reject(error);
