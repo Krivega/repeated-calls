@@ -1,4 +1,4 @@
-import { repeatedCallsAsync, hasReachedLimitError } from '../index';
+import { hasReachedLimitError, repeatedCallsAsync } from '../index';
 
 describe('repeatedCallsAsync', () => {
   let targetFunction: () => Promise<number>;
@@ -61,7 +61,7 @@ describe('repeatedCallsAsync', () => {
       (callCount) => {
         expect(callCount).toBe(1);
         expect(targetFunctionRejected).toHaveBeenCalledTimes(1);
-      }
+      },
     );
   });
 
