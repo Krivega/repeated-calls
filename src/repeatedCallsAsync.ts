@@ -1,5 +1,5 @@
-import { validateParams, createError, promisedCall } from './utils';
-import type { TTargetFunction, TIsComplete, TCheckEnded } from './utils';
+import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
+import { createError, promisedCall, validateParams } from './utils';
 
 const repeatedCallsAsync = <T = any, E = Error>({
   targetFunction,
