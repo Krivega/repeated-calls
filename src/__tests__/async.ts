@@ -1,3 +1,5 @@
+/// <reference types="jest" />
+
 import { hasReachedLimitError, repeatedCallsAsync } from '../index';
 
 describe('repeatedCallsAsync', () => {

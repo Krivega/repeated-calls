@@ -1,4 +1,6 @@
-import repeatedCalls, { hasReachedLimitError } from '../index';
+/// <reference types="jest" />
+
+import { hasReachedLimitError, repeatedCalls } from '../index';
 
 describe('repeatedCalls', () => {
   let targetFunction: () => number;

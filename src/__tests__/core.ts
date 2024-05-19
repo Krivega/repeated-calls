@@ -1,4 +1,6 @@
-import repeatedCalls from '../index';
+/// <reference types="jest" />
+
+import { repeatedCalls } from '../index';
 
 describe('repeatedCalls: core', () => {
   let targetFunction: () => number;
