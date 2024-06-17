@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/Krivega/repeated-calls/compare/v2.1.0...v2.2.0) (2024-06-17)
+
+### Features
+
+- add onAfterCancel ([e4b71d4](https://github.com/Krivega/repeated-calls/commit/e4b71d4d2f00a63a3db0f1d5a734a1cd003432ee))
+
 ## [2.1.0](https://github.com/Krivega/repeated-calls/compare/v2.0.1...v2.1.0) (2024-06-17)
 
 ### Features
