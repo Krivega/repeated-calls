@@ -26,7 +26,7 @@ const repeatedCallsAsync = <T = any, E = Error>({
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
-    return rejectCancelablePromise(validation.error);
+    return rejectCancelablePromise<TResult>(validation.error);
   }
 
   let timeout: NodeJS.Timeout;
@@ -82,7 +82,7 @@ const repeatedCallsAsync = <T = any, E = Error>({
     return lastResultSaved;
   };
 
-  return promisedCall(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<TResult>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsAsync;

@@ -22,7 +22,7 @@ const repeatedCallsSync = <T = any>({
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
-    return rejectCancelablePromise(validation.error);
+    return rejectCancelablePromise<T>(validation.error);
   }
 
   let timeout: NodeJS.Timeout;
@@ -69,7 +69,7 @@ const repeatedCallsSync = <T = any>({
     return lastResultSaved;
   };
 
-  return promisedCall(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<T>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsSync;
