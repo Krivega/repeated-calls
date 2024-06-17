@@ -75,7 +75,11 @@ type TCancelablePromise<T> = Promise<T> & {
 
 export const promisedCall = <T>(
   checkEnded: TCheckEnded<T>,
-  { getLastResult, stopTimeout }: { getLastResult: () => T | undefined; stopTimeout: () => void },
+  {
+    getLastResult,
+    stopTimeout,
+    onAfterCancel = () => {},
+  }: { getLastResult: () => T | undefined; stopTimeout: () => void; onAfterCancel?: () => void },
 ): TCancelablePromise<T | undefined> => {
   let rejectOuter: (error: TReachedLimitError<T> | TCanceledError<T> | unknown) => void = () => {};
   const promise = new Promise<T | undefined>((resolve, reject) => {
@@ -90,6 +94,7 @@ export const promisedCall = <T>(
   cancelablePromise.cancel = () => {
     stopTimeout();
     rejectOuter(createCanceledError(getLastResult()));
+    onAfterCancel();
   };
 
   return cancelablePromise;

@@ -9,11 +9,13 @@ import {
 const repeatedCallsSync = <T = any>({
   targetFunction,
   isComplete,
+  onAfterCancel,
   callLimit = Infinity,
   delay = 300,
 }: {
   targetFunction: TTargetFunction<T>;
   isComplete: TIsComplete<T>;
+  onAfterCancel?: () => void;
   callLimit?: number;
   delay?: number;
 }) => {
@@ -67,7 +69,7 @@ const repeatedCallsSync = <T = any>({
     return lastResultSaved;
   };
 
-  return promisedCall(checkEnded, { getLastResult, stopTimeout });
+  return promisedCall(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsSync;

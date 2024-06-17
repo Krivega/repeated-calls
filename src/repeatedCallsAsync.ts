@@ -9,12 +9,14 @@ import {
 const repeatedCallsAsync = <T = any, E = Error>({
   targetFunction,
   isComplete,
+  onAfterCancel,
   callLimit = Infinity,
   isRejectAsValid = false,
   delay = 300,
 }: {
   targetFunction: TTargetFunction<Promise<T>>;
   isComplete: TIsComplete<T | E>;
+  onAfterCancel?: () => void;
   callLimit?: number;
   isRejectAsValid?: boolean;
   delay?: number;
@@ -80,7 +82,7 @@ const repeatedCallsAsync = <T = any, E = Error>({
     return lastResultSaved;
   };
 
-  return promisedCall(checkEnded, { getLastResult, stopTimeout });
+  return promisedCall(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsAsync;

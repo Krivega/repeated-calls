@@ -15,6 +15,7 @@ describe('repeatedCalls', () => {
     };
 
     targetFunction = jest.fn(innerTargetFunction);
+    targetFunction = jest.fn(innerTargetFunction);
   });
   it('calls end after 1', () => {
     expect.assertions(2);
@@ -117,6 +118,25 @@ describe('repeatedCalls', () => {
       expect(error.message).toBe(`canceled`);
       expect(error.values.lastResult).toBe(1);
       expect(targetFunction).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('onAfterCancel called when canceled', () => {
+    expect.assertions(1);
+
+    const onAfterCancel = jest.fn();
+
+    const isComplete = () => {
+      return false;
+    };
+    const callLimit = 9999;
+
+    const promise = repeatedCalls<number>({ targetFunction, isComplete, callLimit, onAfterCancel });
+
+    promise.cancel();
+
+    return promise.catch(() => {
+      expect(onAfterCancel).toHaveBeenCalledTimes(1);
     });
   });
 });

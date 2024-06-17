@@ -170,6 +170,30 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
+  it('onAfterCancel called when canceled', () => {
+    expect.assertions(1);
+
+    const onAfterCancel = jest.fn();
+
+    const isComplete = () => {
+      return false;
+    };
+    const callLimit = 9999;
+
+    const promise = repeatedCallsAsync<number>({
+      targetFunction,
+      isComplete,
+      callLimit,
+      onAfterCancel,
+    });
+
+    promise.cancel();
+
+    return promise.catch(() => {
+      expect(onAfterCancel).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('complete if the limit is reached: for rejected with isRejectAsValid', () => {
     expect.assertions(4);
 
