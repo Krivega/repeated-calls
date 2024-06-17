@@ -1,5 +1,10 @@
 import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
-import { createError, promisedCall, validateParams } from './utils';
+import {
+  createReachedLimitError,
+  promisedCall,
+  rejectCancelablePromise,
+  validateParams,
+} from './utils';
 
 const repeatedCallsAsync = <T = any, E = Error>({
   targetFunction,
@@ -19,11 +24,13 @@ const repeatedCallsAsync = <T = any, E = Error>({
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
-    return Promise.reject(validation.error);
+    return rejectCancelablePromise(validation.error);
   }
 
   let timeout: NodeJS.Timeout;
   let countCalls = 0;
+  let lastResultSaved: T | undefined;
+
   const checkEnded: TCheckEnded<TResult> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
@@ -32,13 +39,14 @@ const repeatedCallsAsync = <T = any, E = Error>({
     }
 
     if (countCalls >= callLimit) {
-      return reject(createError(callLimit, lastResult));
+      return reject(createReachedLimitError(callLimit, lastResult));
     }
 
     let result: TResult;
 
     try {
       result = await targetFunction();
+      lastResultSaved = result;
     } catch (error) {
       result = error as E;
 
@@ -64,7 +72,15 @@ const repeatedCallsAsync = <T = any, E = Error>({
     return undefined;
   };
 
-  return promisedCall(checkEnded);
+  const stopTimeout = () => {
+    clearTimeout(timeout);
+  };
+
+  const getLastResult = () => {
+    return lastResultSaved;
+  };
+
+  return promisedCall(checkEnded, { getLastResult, stopTimeout });
 };
 
 export default repeatedCallsAsync;

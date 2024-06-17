@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { hasReachedLimitError, repeatedCalls } from '../index';
+import { hasCanceledError, hasReachedLimitError, repeatedCalls } from '../index';
 
 describe('repeatedCalls', () => {
   let targetFunction: () => number;
@@ -84,7 +84,7 @@ describe('repeatedCalls', () => {
     });
   });
 
-  it('complete if the limit is reached', () => {
+  it('complete when the limit is reached', () => {
     expect.assertions(4);
 
     const isComplete = (callCount?: number) => {
@@ -97,6 +97,26 @@ describe('repeatedCalls', () => {
       expect(error.message).toBe(`call limit (${callLimit}) is reached`);
       expect(error.values.lastResult).toBe(callLimit);
       expect(targetFunction).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  it('complete when canceled', () => {
+    expect.assertions(4);
+
+    const isComplete = () => {
+      return false;
+    };
+    const callLimit = 9999;
+
+    const promise = repeatedCalls<number>({ targetFunction, isComplete, callLimit });
+
+    promise.cancel();
+
+    return promise.catch((error) => {
+      expect(hasCanceledError(error)).toBe(true);
+      expect(error.message).toBe(`canceled`);
+      expect(error.values.lastResult).toBe(1);
+      expect(targetFunction).toHaveBeenCalledTimes(1);
     });
   });
 });

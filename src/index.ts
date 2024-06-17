@@ -1,5 +1,5 @@
 import repeatedCallsAsync from './repeatedCallsAsync';
 import repeatedCalls from './repeatedCallsSync';
-import { hasReachedLimitError } from './utils';
+import { hasCanceledError, hasReachedLimitError } from './utils';
 
-export { hasReachedLimitError, repeatedCalls, repeatedCallsAsync };
+export { hasCanceledError, hasReachedLimitError, repeatedCalls, repeatedCallsAsync };

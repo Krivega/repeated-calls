@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { hasReachedLimitError, repeatedCallsAsync } from '../index';
+import { hasCanceledError, hasReachedLimitError, repeatedCallsAsync } from '../index';
 
 describe('repeatedCallsAsync', () => {
   let targetFunction: () => Promise<number>;
@@ -143,6 +143,30 @@ describe('repeatedCallsAsync', () => {
       expect(error.message).toBe(`call limit (${callLimit}) is reached`);
       expect(error.values.lastResult).toBe(callLimit);
       expect(targetFunction).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  it('complete when canceled', () => {
+    expect.assertions(4);
+
+    const isComplete = () => {
+      return false;
+    };
+    const callLimit = 9999;
+
+    const promise = repeatedCallsAsync<number>({
+      targetFunction,
+      isComplete,
+      callLimit,
+    });
+
+    promise.cancel();
+
+    return promise.catch((error) => {
+      expect(hasCanceledError(error)).toBe(true);
+      expect(error.message).toBe(`canceled`);
+      expect(error.values.lastResult).toBe(undefined);
+      expect(targetFunction).toHaveBeenCalledTimes(1);
     });
   });
 
