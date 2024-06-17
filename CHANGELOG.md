@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/Krivega/repeated-calls/compare/v2.0.1...v2.1.0) (2024-06-17)
+
+### Features
+
+- add cancel method ([40aa7a0](https://github.com/Krivega/repeated-calls/commit/40aa7a00228dd2ab5dd7a29be7f263fe2e628903))
+
 ### [2.0.1](https://github.com/Krivega/repeated-calls/compare/v2.0.0...v2.0.1) (2024-05-21)
 
 ### Bug Fixes
