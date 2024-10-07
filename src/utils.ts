@@ -7,7 +7,7 @@ export type TCanceledError<T> = Error & {
   values?: { lastResult?: T };
 };
 export type TTargetFunction<T> = () => T;
-export type TIsComplete<T> = (result?: T) => boolean;
+export type TIsComplete<T> = (result: T) => boolean;
 
 export type TCheckEnded<T> = ({
   resolve,

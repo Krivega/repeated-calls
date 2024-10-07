@@ -17,7 +17,7 @@ const repeatedCallsSync = <T = any, B extends boolean = boolean>({
   isCheckBeforeCall = true as B,
 }: {
   targetFunction: TTargetFunction<T>;
-  isComplete: TIsComplete<T>;
+  isComplete: TIsComplete<TResult<T, B>>;
   onAfterCancel?: () => void;
   callLimit?: number;
   delay?: number;
@@ -36,7 +36,7 @@ const repeatedCallsSync = <T = any, B extends boolean = boolean>({
   const checkEnded: TCheckEnded<TResult<T, B>> = ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
-    if (isCheckBeforeCall && isComplete()) {
+    if (isCheckBeforeCall && isComplete(lastResultSaved)) {
       return resolve(lastResultSaved);
     }
 

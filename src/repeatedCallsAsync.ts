@@ -18,7 +18,7 @@ const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
   isCheckBeforeCall = true as B,
 }: {
   targetFunction: TTargetFunction<Promise<T>>;
-  isComplete: TIsComplete<T | E>;
+  isComplete: TIsComplete<TResult<T, E, B>>;
   onAfterCancel?: () => void;
   callLimit?: number;
   isRejectAsValid?: boolean;
@@ -38,7 +38,7 @@ const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
   const checkEnded: TCheckEnded<TResult<T, E, B>> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
-    if (isCheckBeforeCall && isComplete()) {
+    if (isCheckBeforeCall && isComplete(lastResultSaved)) {
       return resolve(lastResultSaved);
     }
 
