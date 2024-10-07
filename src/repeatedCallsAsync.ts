@@ -6,13 +6,16 @@ import {
   validateParams,
 } from './utils';
 
-const repeatedCallsAsync = <T = any, E = Error>({
+type TResult<T, E, B> = B extends true ? T | E | undefined : T | E;
+
+const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
   targetFunction,
   isComplete,
   onAfterCancel,
   callLimit = Infinity,
   isRejectAsValid = false,
   delay = 300,
+  isCheckBeforeCall = true as B,
 }: {
   targetFunction: TTargetFunction<Promise<T>>;
   isComplete: TIsComplete<T | E>;
@@ -20,31 +23,30 @@ const repeatedCallsAsync = <T = any, E = Error>({
   callLimit?: number;
   isRejectAsValid?: boolean;
   delay?: number;
+  isCheckBeforeCall?: B;
 }) => {
-  type TResult = T | E;
-
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
-    return rejectCancelablePromise<TResult>(validation.error);
+    return rejectCancelablePromise<TResult<T, E, B>>(validation.error);
   }
 
   let timeout: NodeJS.Timeout;
   let countCalls = 0;
-  let lastResultSaved: T | undefined;
+  let lastResultSaved: TResult<T, E, B>;
 
-  const checkEnded: TCheckEnded<TResult> = async ({ resolve, reject, lastResult }) => {
+  const checkEnded: TCheckEnded<TResult<T, E, B>> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
-    if (isComplete()) {
-      return resolve();
+    if (isCheckBeforeCall && isComplete()) {
+      return resolve(lastResultSaved);
     }
 
     if (countCalls >= callLimit) {
       return reject(createReachedLimitError(callLimit, lastResult));
     }
 
-    let result: TResult;
+    let result: TResult<T, E, B>;
 
     try {
       result = await targetFunction();
@@ -82,7 +84,7 @@ const repeatedCallsAsync = <T = any, E = Error>({
     return lastResultSaved;
   };
 
-  return promisedCall<TResult>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<TResult<T, E, B>>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsAsync;

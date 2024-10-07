@@ -139,4 +139,30 @@ describe('repeatedCalls', () => {
       expect(onAfterCancel).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('should not be checked isComplete before the call when isCheckBeforeCall is false', async () => {
+    expect.assertions(2);
+
+    const isComplete = jest.fn((callCount?: number) => {
+      return callCount === 1;
+    });
+
+    await repeatedCalls({ targetFunction, isComplete, isCheckBeforeCall: false });
+
+    expect(isComplete).toHaveBeenCalledTimes(1);
+    expect(targetFunction).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be checked isComplete before the call when isCheckBeforeCall is true', async () => {
+    expect.assertions(2);
+
+    const isComplete = jest.fn((callCount?: number) => {
+      return callCount === 1;
+    });
+
+    await repeatedCalls({ targetFunction, isComplete, isCheckBeforeCall: true });
+
+    expect(isComplete).toHaveBeenCalledTimes(2);
+    expect(targetFunction).toHaveBeenCalledTimes(1);
+  });
 });

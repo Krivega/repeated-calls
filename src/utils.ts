@@ -14,9 +14,9 @@ export type TCheckEnded<T> = ({
   reject,
   lastResult,
 }: {
-  resolve: (result?: T) => void;
+  resolve: (result: T) => void;
   reject: (error: TReachedLimitError<T> | TCanceledError<T> | unknown) => void;
-  lastResult?: T;
+  lastResult: T;
 }) => void;
 
 export const validateParams = ({
@@ -79,17 +79,15 @@ export const promisedCall = <T>(
     getLastResult,
     stopTimeout,
     onAfterCancel = () => {},
-  }: { getLastResult: () => T | undefined; stopTimeout: () => void; onAfterCancel?: () => void },
-): TCancelablePromise<T | undefined> => {
+  }: { getLastResult: () => T; stopTimeout: () => void; onAfterCancel?: () => void },
+): TCancelablePromise<T> => {
   let rejectOuter: (error: TReachedLimitError<T> | TCanceledError<T> | unknown) => void = () => {};
-  const promise = new Promise<T | undefined>((resolve, reject) => {
+  const promise = new Promise<T>((resolve, reject) => {
     rejectOuter = reject;
-    checkEnded({ resolve, reject });
+    checkEnded({ resolve, reject, lastResult: getLastResult() });
   });
 
-  const cancelablePromise: TCancelablePromise<T | undefined> = promise as TCancelablePromise<
-    T | undefined
-  >;
+  const cancelablePromise: TCancelablePromise<T> = promise as TCancelablePromise<T>;
 
   cancelablePromise.cancel = () => {
     stopTimeout();
@@ -100,12 +98,10 @@ export const promisedCall = <T>(
   return cancelablePromise;
 };
 
-export const rejectCancelablePromise = <T>(error?: Error): TCancelablePromise<T | undefined> => {
-  const promise = Promise.reject<T | undefined>(error);
+export const rejectCancelablePromise = <T>(error?: Error): TCancelablePromise<T> => {
+  const promise = Promise.reject<T>(error);
 
-  const cancelablePromise: TCancelablePromise<T | undefined> = promise as TCancelablePromise<
-    T | undefined
-  >;
+  const cancelablePromise: TCancelablePromise<T> = promise as TCancelablePromise<T>;
 
   cancelablePromise.cancel = () => {};
 

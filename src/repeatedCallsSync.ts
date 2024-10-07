@@ -6,34 +6,38 @@ import {
   validateParams,
 } from './utils';
 
-const repeatedCallsSync = <T = any>({
+type TResult<T, B> = B extends true ? T | undefined : T;
+
+const repeatedCallsSync = <T = any, B extends boolean = boolean>({
   targetFunction,
   isComplete,
   onAfterCancel,
   callLimit = Infinity,
   delay = 300,
+  isCheckBeforeCall = true as B,
 }: {
   targetFunction: TTargetFunction<T>;
   isComplete: TIsComplete<T>;
   onAfterCancel?: () => void;
   callLimit?: number;
   delay?: number;
+  isCheckBeforeCall?: B;
 }) => {
   const validation = validateParams({ targetFunction, isComplete });
 
   if (!validation.valid) {
-    return rejectCancelablePromise<T>(validation.error);
+    return rejectCancelablePromise<TResult<T, B>>(validation.error);
   }
 
   let timeout: NodeJS.Timeout;
   let countCalls = 0;
-  let lastResultSaved: T | undefined;
+  let lastResultSaved: TResult<T, B>;
 
-  const checkEnded: TCheckEnded<T> = ({ resolve, reject, lastResult }) => {
+  const checkEnded: TCheckEnded<TResult<T, B>> = ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
-    if (isComplete()) {
-      return resolve();
+    if (isCheckBeforeCall && isComplete()) {
+      return resolve(lastResultSaved);
     }
 
     if (countCalls >= callLimit) {
@@ -69,7 +73,7 @@ const repeatedCallsSync = <T = any>({
     return lastResultSaved;
   };
 
-  return promisedCall<T>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<TResult<T, B>>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
 };
 
 export default repeatedCallsSync;
