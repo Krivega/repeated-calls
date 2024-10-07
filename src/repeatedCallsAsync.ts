@@ -46,13 +46,10 @@ const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
       return reject(createReachedLimitError(callLimit, lastResult));
     }
 
-    let result: TResult<T, E, B>;
-
     try {
-      result = await targetFunction();
-      lastResultSaved = result;
+      lastResultSaved = await targetFunction();
     } catch (error) {
-      result = error as E;
+      lastResultSaved = error as E;
 
       if (!isRejectAsValid) {
         return reject(error);
@@ -61,16 +58,16 @@ const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
 
     countCalls += 1;
 
-    if (isComplete(result)) {
-      return resolve(result);
+    if (isComplete(lastResultSaved)) {
+      return resolve(lastResultSaved);
     }
 
     if (delay && delay > 0) {
       timeout = setTimeout(() => {
-        return checkEnded({ resolve, reject, lastResult: result });
+        return checkEnded({ resolve, reject, lastResult: lastResultSaved });
       }, delay);
     } else {
-      checkEnded({ resolve, reject, lastResult: result });
+      checkEnded({ resolve, reject, lastResult: lastResultSaved });
     }
 
     return undefined;

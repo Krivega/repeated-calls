@@ -44,25 +44,23 @@ const repeatedCallsSync = <T = any, B extends boolean = boolean>({
       return reject(createReachedLimitError<T>(callLimit, lastResult));
     }
 
-    const result = targetFunction();
-
-    lastResultSaved = result;
+    lastResultSaved = targetFunction();
 
     countCalls += 1;
 
-    if (isComplete(result)) {
-      return resolve(result);
+    if (isComplete(lastResultSaved)) {
+      return resolve(lastResultSaved);
     }
 
     if (delay && delay > 0) {
       timeout = setTimeout(() => {
-        return checkEnded({ resolve, reject, lastResult: result });
+        return checkEnded({ resolve, reject, lastResult: lastResultSaved });
       }, delay);
 
       return undefined;
     }
 
-    return checkEnded({ resolve, reject, lastResult: result });
+    return checkEnded({ resolve, reject, lastResult: lastResultSaved });
   };
 
   const stopTimeout = () => {
