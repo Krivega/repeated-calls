@@ -143,7 +143,7 @@ describe('repeatedCalls', () => {
   it('should not be checked isComplete before the call when isCheckBeforeCall is false', async () => {
     expect.assertions(2);
 
-    const isComplete = jest.fn((callCount?: number) => {
+    const isComplete = jest.fn((callCount: number) => {
       return callCount === 1;
     });
 
