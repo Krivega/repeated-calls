@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/Krivega/repeated-calls/compare/v2.2.1...v2.3.0) (2024-10-07)
+
+### Features
+
+- allow to disable is-complete checking before request ([8566d0e](https://github.com/Krivega/repeated-calls/commit/8566d0ecfde7b62b1d513dfbc205e9f950590a94))
+
 ### [2.2.1](https://github.com/Krivega/repeated-calls/compare/v2.2.0...v2.2.1) (2024-06-17)
 
 ### Bug Fixes
