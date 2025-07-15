@@ -8,7 +8,7 @@ import {
 
 type TResult<T, E, B> = B extends true ? T | E | undefined : T | E;
 
-const repeatedCallsAsync = <T = any, E = Error, B extends boolean = boolean>({
+const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>({
   targetFunction,
   isComplete,
   onAfterCancel,

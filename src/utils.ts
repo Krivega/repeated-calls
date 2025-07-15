@@ -19,12 +19,12 @@ export type TCheckEnded<T> = ({
   lastResult: T;
 }) => void;
 
-export const validateParams = ({
+export const validateParams = <T, B>({
   targetFunction,
   isComplete,
 }: {
-  targetFunction?: any;
-  isComplete?: any;
+  targetFunction?: TTargetFunction<T>;
+  isComplete?: TIsComplete<B>;
 }) => {
   if (!targetFunction) {
     return { valid: false, error: new Error('targetFunction is required') };
@@ -36,6 +36,7 @@ export const validateParams = ({
 
   return { valid: true };
 };
+
 const ERROR_ID_REACHED_LIMIT = Symbol('call limit is reached');
 
 export const createReachedLimitError = <T>(
