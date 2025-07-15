@@ -51,8 +51,13 @@ export const createReachedLimitError = <T>(
   return error;
 };
 
-export const hasReachedLimitError = <T>(error: TReachedLimitError<T>) => {
-  return error.id === ERROR_ID_REACHED_LIMIT;
+export const hasReachedLimitError = <T>(error: unknown): error is TReachedLimitError<T> => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'id' in error &&
+    error.id === ERROR_ID_REACHED_LIMIT
+  );
 };
 
 const ERROR_ID_CANCEL = Symbol('canceled');
