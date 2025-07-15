@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](https://github.com/Krivega/repeated-calls/compare/v2.3.0...v2.3.1) (2025-07-15)
+
+### Bug Fixes
+
+- hasCanceledError ([49940e6](https://github.com/Krivega/repeated-calls/commit/49940e67bfd6c0b7429b3fba035f7d219ac57b87))
+
 ## [2.3.0](https://github.com/Krivega/repeated-calls/compare/v2.2.1...v2.3.0) (2024-10-07)
 
 ### Features
