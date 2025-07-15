@@ -65,8 +65,10 @@ export const createCanceledError = <T>(lastResult?: T): TCanceledError<T> => {
   return error;
 };
 
-export const hasCanceledError = <T>(error: TCanceledError<T>) => {
-  return error.id === ERROR_ID_CANCEL;
+export const hasCanceledError = <T>(error: unknown): error is TCanceledError<T> => {
+  return (
+    typeof error === 'object' && error !== null && 'id' in error && error.id === ERROR_ID_CANCEL
+  );
 };
 
 type TCancelablePromise<T> = Promise<T> & {
