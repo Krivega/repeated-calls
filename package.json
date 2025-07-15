@@ -1,6 +1,6 @@
 {
   "name": "repeated-calls",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "Repeated calls to the function",
   "keywords": [
     "promise"
