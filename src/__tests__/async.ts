@@ -242,25 +242,28 @@ describe('repeatedCallsAsync', () => {
     expect(targetFunction).toHaveBeenCalledTimes(1);
   });
 
-
   it('should throw "call limit (1) is reached" instead of the original error if the first call fails and callLimit=1 with isRejectAsValid=true', async () => {
     expect.assertions(5);
-  
+
     class CustomError extends Error {
       constructor() {
         super('CustomError error');
         this.name = 'CustomError';
       }
     }
-  
-    const targetFunction = jest.fn(() => Promise.reject(new CustomError()));
-  
-    const isComplete = () => false;
+
+    const targetFunctionRejectedCustomError = jest.fn(() => {
+      return Promise.reject(new CustomError());
+    });
+
+    const isComplete = () => {
+      return false;
+    };
     const callLimit = 1;
-  
+
     try {
       await repeatedCallsAsync({
-        targetFunction,
+        targetFunction: targetFunctionRejectedCustomError,
         isComplete,
         callLimit,
         isRejectAsValid: true,
@@ -270,8 +273,12 @@ describe('repeatedCallsAsync', () => {
       expect((error as Error).message).toBe('call limit (1) is reached');
       // Проверяем, что ошибка не CustomError
       expect(error).not.toBeInstanceOf(CustomError);
-      expect((error as TReachedLimitError<CustomError>).values?.lastResult).toBeInstanceOf(CustomError);
-      expect((error as TReachedLimitError<CustomError>).values?.lastResult?.message).toBe('CustomError error');
+      expect((error as TReachedLimitError<CustomError>).values?.lastResult).toBeInstanceOf(
+        CustomError,
+      );
+      expect((error as TReachedLimitError<CustomError>).values?.lastResult?.message).toBe(
+        'CustomError error',
+      );
     }
   });
 });
