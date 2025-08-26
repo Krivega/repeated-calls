@@ -37,7 +37,7 @@ export const validateParams = <T, B>({
   return { valid: true };
 };
 
-const ERROR_ID_REACHED_LIMIT = Symbol('call limit is reached');
+const ERROR_ID_REACHED_LIMIT = 'repeated-calls: limit is reached';
 
 export const createReachedLimitError = <T>(
   callLimit: number,
@@ -60,7 +60,7 @@ export const hasReachedLimitError = <T>(error: unknown): error is TReachedLimitE
   );
 };
 
-const ERROR_ID_CANCEL = Symbol('canceled');
+const ERROR_ID_CANCEL = 'repeated-calls: canceled';
 
 export const createCanceledError = <T>(lastResult?: T): TCanceledError<T> => {
   const error = new Error(`canceled`) as TCanceledError<T>;
