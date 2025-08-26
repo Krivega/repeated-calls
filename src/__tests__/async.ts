@@ -1,33 +1,36 @@
+/* eslint-disable jest/no-conditional-expect */
 /// <reference types="jest" />
 
 import { hasCanceledError, hasReachedLimitError, repeatedCallsAsync } from '../index';
-import type { TReachedLimitError } from '../utils';
+
+import type { TCanceledError, TReachedLimitError } from '../utils';
 
 describe('repeatedCallsAsync', () => {
   let targetFunction: () => Promise<number>;
   let targetFunctionRejected: () => Promise<number>;
 
   beforeEach(() => {
-    const innerTargetFunctionResolved: (() => Promise<number>) & { count?: number } = () => {
-      innerTargetFunctionResolved.count = innerTargetFunctionResolved.count || 0;
+    const innerTargetFunctionResolved: (() => Promise<number>) & { count?: number } = async () => {
+      innerTargetFunctionResolved.count ??= 0;
 
       innerTargetFunctionResolved.count += 1;
 
-      return Promise.resolve<number>(innerTargetFunctionResolved.count);
+      return innerTargetFunctionResolved.count;
     };
-    const innerTargetFunctionRejected: (() => Promise<number>) & { count?: number } = () => {
-      innerTargetFunctionRejected.count = innerTargetFunctionRejected.count || 0;
+    const innerTargetFunctionRejected: (() => Promise<number>) & { count?: number } = async () => {
+      innerTargetFunctionRejected.count ??= 0;
 
       innerTargetFunctionRejected.count += 1;
 
-      return Promise.reject<number>(innerTargetFunctionRejected.count);
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      throw innerTargetFunctionRejected.count;
     };
 
     targetFunction = jest.fn(innerTargetFunctionResolved);
     targetFunctionRejected = jest.fn(innerTargetFunctionRejected);
   });
 
-  it('calls end after 1', () => {
+  it('calls end after 1', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number | Error) => {
@@ -40,7 +43,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('calls end after 3', () => {
+  it('calls end after 3', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number | Error) => {
@@ -53,7 +56,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('calls for rejected with isRejectAsValid=false (by default)', () => {
+  it('calls for rejected with isRejectAsValid=false (by default)', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number | Error) => {
@@ -61,14 +64,14 @@ describe('repeatedCallsAsync', () => {
     };
 
     return repeatedCallsAsync<number>({ isComplete, targetFunction: targetFunctionRejected }).catch(
-      (callCount) => {
-        expect(callCount).toBe(1);
+      (error: unknown) => {
+        expect(error).toBe(1);
         expect(targetFunctionRejected).toHaveBeenCalledTimes(1);
       },
     );
   });
 
-  it('calls for rejected with isRejectAsValid=true', () => {
+  it('calls for rejected with isRejectAsValid=true', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number | Error) => {
@@ -85,7 +88,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('delay', () => {
+  it('delay', async () => {
     expect.assertions(2);
 
     const numberCalls = 4;
@@ -107,7 +110,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('delay 0', () => {
+  it('delay 0', async () => {
     expect.assertions(1);
 
     const numberCalls = 4;
@@ -127,7 +130,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('complete if the limit is reached', () => {
+  it('complete if the limit is reached', async () => {
     expect.assertions(4);
 
     const isComplete = (callCount?: number | Error) => {
@@ -139,15 +142,15 @@ describe('repeatedCallsAsync', () => {
       targetFunction,
       isComplete,
       callLimit,
-    }).catch((error) => {
+    }).catch((error: unknown) => {
       expect(hasReachedLimitError(error)).toBe(true);
-      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
-      expect(error.values.lastResult).toBe(callLimit);
+      expect((error as TReachedLimitError).message).toBe(`call limit (${callLimit}) is reached`);
+      expect((error as TReachedLimitError).values?.lastResult).toBe(callLimit);
       expect(targetFunction).toHaveBeenCalledTimes(3);
     });
   });
 
-  it('complete when canceled', () => {
+  it('complete when canceled', async () => {
     expect.assertions(4);
 
     const isComplete = () => {
@@ -163,15 +166,15 @@ describe('repeatedCallsAsync', () => {
 
     promise.cancel();
 
-    return promise.catch((error) => {
+    return promise.catch((error: unknown) => {
       expect(hasCanceledError(error)).toBe(true);
-      expect(error.message).toBe(`canceled`);
-      expect(error.values.lastResult).toBe(undefined);
+      expect((error as TCanceledError).message).toBe('canceled');
+      expect((error as TCanceledError).values?.lastResult).toBe(undefined);
       expect(targetFunction).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('onAfterCancel called when canceled', () => {
+  it('onAfterCancel called when canceled', async () => {
     expect.assertions(1);
 
     const onAfterCancel = jest.fn();
@@ -195,7 +198,7 @@ describe('repeatedCallsAsync', () => {
     });
   });
 
-  it('complete if the limit is reached: for rejected with isRejectAsValid', () => {
+  it('complete if the limit is reached: for rejected with isRejectAsValid', async () => {
     expect.assertions(4);
 
     const isComplete = (callCount?: number | Error) => {
@@ -208,10 +211,10 @@ describe('repeatedCallsAsync', () => {
       callLimit,
       targetFunction: targetFunctionRejected,
       isRejectAsValid: true,
-    }).catch((error) => {
+    }).catch((error: unknown) => {
       expect(hasReachedLimitError(error)).toBe(true);
-      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
-      expect(error.values.lastResult).toBe(callLimit);
+      expect((error as TReachedLimitError).message).toBe(`call limit (${callLimit}) is reached`);
+      expect((error as TReachedLimitError).values?.lastResult).toBe(callLimit);
       expect(targetFunctionRejected).toHaveBeenCalledTimes(3);
     });
   });
@@ -246,14 +249,14 @@ describe('repeatedCallsAsync', () => {
     expect.assertions(5);
 
     class CustomError extends Error {
-      constructor() {
+      public constructor() {
         super('CustomError error');
         this.name = 'CustomError';
       }
     }
 
-    const targetFunctionRejectedCustomError = jest.fn(() => {
-      return Promise.reject(new CustomError());
+    const targetFunctionRejectedCustomError = jest.fn(async () => {
+      throw new CustomError();
     });
 
     const isComplete = () => {

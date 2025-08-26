@@ -1,7 +1,5 @@
-import repeatedCallsAsync from './repeatedCallsAsync';
-import repeatedCalls from './repeatedCallsSync';
-import type { TCanceledError, TReachedLimitError } from './utils';
-import { hasCanceledError, hasReachedLimitError } from './utils';
+export { default as repeatedCallsAsync } from './repeatedCallsAsync';
 
-export { hasCanceledError, hasReachedLimitError, repeatedCalls, repeatedCallsAsync };
-export type { TCanceledError, TReachedLimitError };
+export { default as repeatedCalls } from './repeatedCallsSync';
+export { hasCanceledError, hasReachedLimitError } from './utils';
+export type { TCanceledError, TReachedLimitError } from './utils';

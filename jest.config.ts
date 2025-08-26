@@ -4,7 +4,7 @@ const jestConfig: JestConfigWithTsJest = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
+    'src/**/*.{js,ts}',
     '!<rootDir>/node_modules/',
     '!<rootDir>/demoDist/**',
     '!<rootDir>/dist/**',
@@ -13,8 +13,7 @@ const jestConfig: JestConfigWithTsJest = {
     '!src/**/types.ts',
     '!src/**/typings.ts',
     '!src/index.ts',
-    '!src/testUtils.ts',
-    '!src/typesMST/functionType.ts',
+    '!src/testUtils.ts'
   ],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   reporters: ['default', 'jest-junit'],

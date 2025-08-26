@@ -1,10 +1,11 @@
-import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
 import {
   createReachedLimitError,
   promisedCall,
   rejectCancelablePromise,
   validateParams,
 } from './utils';
+
+import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
 
 type TResult<T, B> = B extends true ? T | undefined : T;
 
@@ -22,6 +23,7 @@ const repeatedCallsSync = <T = unknown, B extends boolean = boolean>({
   callLimit?: number;
   delay?: number;
   isCheckBeforeCall?: B;
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
 }) => {
   const validation = validateParams({ targetFunction, isComplete });
 
@@ -37,11 +39,15 @@ const repeatedCallsSync = <T = unknown, B extends boolean = boolean>({
     clearTimeout(timeout);
 
     if (isCheckBeforeCall && isComplete(lastResultSaved)) {
-      return resolve(lastResultSaved);
+      resolve(lastResultSaved);
+
+      return;
     }
 
     if (countCalls >= callLimit) {
-      return reject(createReachedLimitError<T>(callLimit, lastResult));
+      reject(createReachedLimitError<T>(callLimit, lastResult));
+
+      return;
     }
 
     lastResultSaved = targetFunction();
@@ -49,18 +55,20 @@ const repeatedCallsSync = <T = unknown, B extends boolean = boolean>({
     countCalls += 1;
 
     if (isComplete(lastResultSaved)) {
-      return resolve(lastResultSaved);
+      resolve(lastResultSaved);
+
+      return;
     }
 
     if (delay && delay > 0) {
       timeout = setTimeout(() => {
-        return checkEnded({ resolve, reject, lastResult: lastResultSaved });
+        checkEnded({ resolve, reject, lastResult: lastResultSaved });
       }, delay);
 
-      return undefined;
+      return;
     }
 
-    return checkEnded({ resolve, reject, lastResult: lastResultSaved });
+    checkEnded({ resolve, reject, lastResult: lastResultSaved });
   };
 
   const stopTimeout = () => {

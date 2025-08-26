@@ -1,9 +1,11 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "baseUrl": "./",
     "types": ["vite/client", "node"]
   },
-  "include": ["src", "jest.config.ts"]
+  "include": ["src", "jest.config.ts", "eslint.config.ts", "vite.config.ts"]
 }

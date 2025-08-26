@@ -1,8 +1,9 @@
-export type TReachedLimitError<T> = Error & {
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+export type TReachedLimitError<T = unknown> = Error & {
   id?: typeof ERROR_ID_REACHED_LIMIT;
   values?: { lastResult?: T };
 };
-export type TCanceledError<T> = Error & {
+export type TCanceledError<T = unknown> = Error & {
   id?: typeof ERROR_ID_CANCEL;
   values?: { lastResult?: T };
 };
@@ -63,7 +64,7 @@ export const hasReachedLimitError = <T>(error: unknown): error is TReachedLimitE
 const ERROR_ID_CANCEL = 'repeated-calls: canceled';
 
 export const createCanceledError = <T>(lastResult?: T): TCanceledError<T> => {
-  const error = new Error(`canceled`) as TCanceledError<T>;
+  const error = new Error('canceled') as TCanceledError<T>;
 
   error.id = ERROR_ID_CANCEL;
   error.values = { lastResult };
@@ -107,6 +108,7 @@ export const promisedCall = <T>(
 };
 
 export const rejectCancelablePromise = <T>(error?: Error): TCancelablePromise<T> => {
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
   const promise = Promise.reject<T>(error);
 
   const cancelablePromise: TCancelablePromise<T> = promise as TCancelablePromise<T>;

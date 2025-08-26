@@ -1,13 +1,16 @@
+/* eslint-disable jest/no-conditional-expect */
 /// <reference types="jest" />
 
 import { hasCanceledError, hasReachedLimitError, repeatedCalls } from '../index';
+
+import type { TCanceledError, TReachedLimitError } from '../index';
 
 describe('repeatedCalls', () => {
   let targetFunction: () => number;
 
   beforeEach(() => {
     const innerTargetFunction: (() => number) & { count?: number } = () => {
-      innerTargetFunction.count = innerTargetFunction.count || 0;
+      innerTargetFunction.count ??= 0;
 
       innerTargetFunction.count += 1;
 
@@ -17,7 +20,7 @@ describe('repeatedCalls', () => {
     targetFunction = jest.fn(innerTargetFunction);
     targetFunction = jest.fn(innerTargetFunction);
   });
-  it('calls end after 1', () => {
+  it('calls end after 1', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number) => {
@@ -30,7 +33,7 @@ describe('repeatedCalls', () => {
     });
   });
 
-  it('calls end after 3', () => {
+  it('calls end after 3', async () => {
     expect.assertions(2);
 
     const isComplete = (callCount?: number) => {
@@ -43,7 +46,7 @@ describe('repeatedCalls', () => {
     });
   });
 
-  it('delay', () => {
+  it('delay', async () => {
     expect.assertions(2);
 
     const numberCalls = 4;
@@ -65,7 +68,7 @@ describe('repeatedCalls', () => {
     });
   });
 
-  it('delay 0', () => {
+  it('delay 0', async () => {
     expect.assertions(1);
 
     const numberCalls = 4;
@@ -85,7 +88,7 @@ describe('repeatedCalls', () => {
     });
   });
 
-  it('complete when the limit is reached', () => {
+  it('complete when the limit is reached', async () => {
     expect.assertions(4);
 
     const isComplete = (callCount?: number) => {
@@ -93,15 +96,17 @@ describe('repeatedCalls', () => {
     };
     const callLimit = 3;
 
-    return repeatedCalls<number>({ targetFunction, isComplete, callLimit }).catch((error) => {
-      expect(hasReachedLimitError(error)).toBe(true);
-      expect(error.message).toBe(`call limit (${callLimit}) is reached`);
-      expect(error.values.lastResult).toBe(callLimit);
-      expect(targetFunction).toHaveBeenCalledTimes(3);
-    });
+    return repeatedCalls<number>({ targetFunction, isComplete, callLimit }).catch(
+      (error: unknown) => {
+        expect(hasReachedLimitError(error)).toBe(true);
+        expect((error as TReachedLimitError).message).toBe(`call limit (${callLimit}) is reached`);
+        expect((error as TReachedLimitError).values?.lastResult).toBe(callLimit);
+        expect(targetFunction).toHaveBeenCalledTimes(3);
+      },
+    );
   });
 
-  it('complete when canceled', () => {
+  it('complete when canceled', async () => {
     expect.assertions(4);
 
     const isComplete = () => {
@@ -113,15 +118,15 @@ describe('repeatedCalls', () => {
 
     promise.cancel();
 
-    return promise.catch((error) => {
+    return promise.catch((error: unknown) => {
       expect(hasCanceledError(error)).toBe(true);
-      expect(error.message).toBe(`canceled`);
-      expect(error.values.lastResult).toBe(1);
+      expect((error as TCanceledError).message).toBe('canceled');
+      expect((error as TCanceledError).values?.lastResult).toBe(1);
       expect(targetFunction).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('onAfterCancel called when canceled', () => {
+  it('onAfterCancel called when canceled', async () => {
     expect.assertions(1);
 
     const onAfterCancel = jest.fn();

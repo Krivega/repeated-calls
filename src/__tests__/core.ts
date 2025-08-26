@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 /// <reference types="jest" />
 
 import { repeatedCalls } from '../index';
@@ -7,7 +8,7 @@ describe('repeatedCalls: core', () => {
 
   beforeEach(() => {
     const innerTargetFunction: (() => number) & { count?: number } = () => {
-      innerTargetFunction.count = innerTargetFunction.count || 0;
+      innerTargetFunction.count ??= 0;
 
       innerTargetFunction.count += 1;
 
@@ -17,25 +18,25 @@ describe('repeatedCalls: core', () => {
     targetFunction = jest.fn(innerTargetFunction);
   });
 
-  it('not full params: targetFunction', () => {
+  it('not full params: targetFunction', async () => {
     expect.assertions(1);
 
     // @ts-ignore
-    return repeatedCalls<number>({}).catch((error) => {
-      expect(error.message).toBe('targetFunction is required');
+    return repeatedCalls<number>({}).catch((error: unknown) => {
+      expect((error as Error).message).toBe('targetFunction is required');
     });
   });
 
-  it('not full params: isComplete', () => {
+  it('not full params: isComplete', async () => {
     expect.assertions(1);
 
     // @ts-ignore
-    return repeatedCalls<number>({ targetFunction }).catch((error) => {
-      expect(error.message).toBe('isComplete is required');
+    return repeatedCalls<number>({ targetFunction }).catch((error: unknown) => {
+      expect((error as Error).message).toBe('isComplete is required');
     });
   });
 
-  it('not called if isComplete returns true', () => {
+  it('not called if isComplete returns true', async () => {
     expect.assertions(1);
 
     const isComplete = () => {

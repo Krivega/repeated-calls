@@ -1,10 +1,12 @@
-import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
+/* eslint-disable require-atomic-updates */
 import {
   createReachedLimitError,
   promisedCall,
   rejectCancelablePromise,
   validateParams,
 } from './utils';
+
+import type { TCheckEnded, TIsComplete, TTargetFunction } from './utils';
 
 type TResult<T, E, B> = B extends true ? T | E | undefined : T | E;
 
@@ -24,6 +26,7 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
   isRejectAsValid?: boolean;
   delay?: number;
   isCheckBeforeCall?: B;
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
 }) => {
   const validation = validateParams({ targetFunction, isComplete });
 
@@ -35,15 +38,20 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
   let countCalls = 0;
   let lastResultSaved: TResult<T, E, B>;
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const checkEnded: TCheckEnded<TResult<T, E, B>> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
     if (isCheckBeforeCall && isComplete(lastResultSaved)) {
-      return resolve(lastResultSaved);
+      resolve(lastResultSaved);
+
+      return;
     }
 
     if (countCalls >= callLimit) {
-      return reject(createReachedLimitError(callLimit, lastResult));
+      reject(createReachedLimitError(callLimit, lastResult));
+
+      return;
     }
 
     try {
@@ -52,25 +60,27 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
       lastResultSaved = error as E;
 
       if (!isRejectAsValid) {
-        return reject(error);
+        reject(error);
+
+        return;
       }
     }
 
     countCalls += 1;
 
     if (isComplete(lastResultSaved)) {
-      return resolve(lastResultSaved);
+      resolve(lastResultSaved);
+
+      return;
     }
 
     if (delay && delay > 0) {
       timeout = setTimeout(() => {
-        return checkEnded({ resolve, reject, lastResult: lastResultSaved });
+        checkEnded({ resolve, reject, lastResult: lastResultSaved });
       }, delay);
     } else {
       checkEnded({ resolve, reject, lastResult: lastResultSaved });
     }
-
-    return undefined;
   };
 
   const stopTimeout = () => {
