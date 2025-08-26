@@ -1,5 +1,6 @@
 /* eslint-disable require-atomic-updates */
 import {
+  createCanceledError,
   createReachedLimitError,
   promisedCall,
   rejectCancelablePromise,
@@ -37,19 +38,30 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
   let timeout: NodeJS.Timeout;
   let countCalls = 0;
   let lastResultSaved: TResult<T, E, B>;
+  let isStopRequested = false;
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const checkEnded: TCheckEnded<TResult<T, E, B>> = async ({ resolve, reject, lastResult }) => {
     clearTimeout(timeout);
 
-    if (isCheckBeforeCall && isComplete(lastResultSaved)) {
+    if (!isStopRequested && isCheckBeforeCall && isComplete(lastResultSaved)) {
       resolve(lastResultSaved);
 
       return;
     }
 
-    if (countCalls >= callLimit) {
+    if (!isStopRequested && countCalls >= callLimit) {
       reject(createReachedLimitError(callLimit, lastResult));
+
+      return;
+    }
+
+    if (isStopRequested) {
+      reject(createCanceledError());
+
+      if (onAfterCancel) {
+        onAfterCancel();
+      }
 
       return;
     }
@@ -67,6 +79,17 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
     }
 
     countCalls += 1;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (isStopRequested) {
+      reject(createCanceledError());
+
+      if (onAfterCancel) {
+        onAfterCancel();
+      }
+
+      return;
+    }
 
     if (isComplete(lastResultSaved)) {
       resolve(lastResultSaved);
@@ -91,7 +114,14 @@ const repeatedCallsAsync = <T = unknown, E = Error, B extends boolean = boolean>
     return lastResultSaved;
   };
 
-  return promisedCall<TResult<T, E, B>>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<TResult<T, E, B>>(checkEnded, {
+    getLastResult,
+    stopTimeout,
+    onAfterCancel,
+    onStopRepeatedCalls: () => {
+      isStopRequested = true;
+    },
+  });
 };
 
 export default repeatedCallsAsync;

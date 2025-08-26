@@ -284,4 +284,57 @@ describe('repeatedCallsAsync', () => {
       );
     }
   });
+
+  it('should stop calls when stopRepeatedCalls is called before targetFunction completes', async () => {
+    expect.assertions(7);
+
+    let testState = 0;
+
+    const targetFunctionDelayed = jest.fn(async () => {
+      const promise = new Promise<number>((resolve) => {
+        setTimeout(() => {
+          resolve(42);
+        }, 100);
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      promise.then(() => {
+        testState += 1;
+      });
+
+      return promise;
+    });
+
+    const isComplete = () => {
+      return testState === 1;
+    };
+
+    const promise = repeatedCallsAsync<number>({
+      targetFunction: targetFunctionDelayed,
+      isComplete,
+      callLimit: 9999,
+    });
+
+    promise.stopRepeatedCalls();
+
+    try {
+      await promise;
+    } catch (error) {
+      expect(hasCanceledError(error)).toBe(true);
+      expect((error as TCanceledError<number>).message).toBe('canceled');
+      expect((error as TCanceledError<number>).values?.lastResult).toBe(undefined);
+      expect(testState).toBe(1);
+    }
+
+    // Проверяем, что targetFunction был вызван
+    expect(targetFunctionDelayed).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    // Проверяем, что targetFunction не был вызван еще раз
+    expect(targetFunctionDelayed).toHaveBeenCalledTimes(1);
+    expect(testState).toBe(1);
+  });
 });

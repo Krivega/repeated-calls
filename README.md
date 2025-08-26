@@ -75,10 +75,96 @@ const targetFunction = function innerTargetFunction() {
 };
 const isComplete = (callCount) => callCount === 3;
 
-return repeatedCalls({ targetFunction, isComplete }).then((callCount) => {
+return repeatedCallsAsync({ targetFunction, isComplete }).then((callCount) => {
   console.log(callCount); // 3
 });
 ```
+
+### Stop repeated calls
+
+Both `repeatedCalls` and `repeatedCallsAsync` support stopping further attempts using `stopRepeatedCalls()` method:
+
+```js
+import { repeatedCallsAsync } from 'repeated-calls';
+
+const targetFunction = async () => {
+  // Simulate some async work
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  return Math.random();
+};
+
+const isComplete = () => false; // Never complete
+const promise = repeatedCallsAsync({ targetFunction, isComplete, callLimit: 1000 });
+
+// Stop further calls after the current one completes
+promise.stopRepeatedCalls();
+
+promise.catch((error) => {
+  if (error.message === 'canceled') {
+    console.log('Repeated calls stopped');
+  }
+});
+```
+
+### Cancel execution
+
+You can also cancel the execution immediately using `cancel()` method:
+
+```js
+import repeatedCalls from 'repeated-calls';
+
+const targetFunction = () => Math.random();
+const isComplete = () => false;
+const promise = repeatedCalls({ targetFunction, isComplete, callLimit: 1000 });
+
+// Cancel immediately
+promise.cancel();
+
+promise.catch((error) => {
+  if (error.message === 'canceled') {
+    console.log('Execution canceled');
+  }
+});
+```
+
+## API
+
+### repeatedCalls(options)
+
+Synchronous version for functions that return values directly.
+
+**Options:**
+
+- `targetFunction`: Function to call repeatedly
+- `isComplete`: Function that determines if the result is complete
+- `callLimit` (optional): Maximum number of calls (default: Infinity)
+- `delay` (optional): Delay between calls in milliseconds (default: 300)
+- `isCheckBeforeCall` (optional): Check completion before calling (default: true)
+- `onAfterCancel` (optional): Callback after cancellation
+
+**Returns:** Promise with methods:
+
+- `cancel()`: Cancel execution immediately
+- `stopRepeatedCalls()`: Stop further attempts after current call completes
+
+### repeatedCallsAsync(options)
+
+Asynchronous version for functions that return Promises.
+
+**Options:**
+
+- `targetFunction`: Async function to call repeatedly
+- `isComplete`: Function that determines if the result is complete
+- `callLimit` (optional): Maximum number of calls (default: Infinity)
+- `delay` (optional): Delay between calls in milliseconds (default: 300)
+- `isCheckBeforeCall` (optional): Check completion before calling (default: true)
+- `isRejectAsValid` (optional): Treat rejections as valid results (default: false)
+- `onAfterCancel` (optional): Callback after cancellation
+
+**Returns:** Promise with methods:
+
+- `cancel()`: Cancel execution immediately
+- `stopRepeatedCalls()`: Stop further attempts after current call completes
 
 ## Run tests
 
@@ -99,5 +185,5 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 ## 📝 License
 
-Copyright © 2020 [Krivega Dmitriy](https://github.com/Krivega).<br />
+Copyright © 2020 - 2025 [Krivega Dmitriy](https://github.com/Krivega).<br />
 This project is [MIT](https://github.com/Krivega/repeated-calls/blob/master/LICENSE) licensed.

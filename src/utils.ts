@@ -80,6 +80,7 @@ export const hasCanceledError = <T>(error: unknown): error is TCanceledError<T> 
 
 type TCancelablePromise<T> = Promise<T> & {
   cancel: () => void;
+  stopRepeatedCalls: () => void;
 };
 
 export const promisedCall = <T>(
@@ -88,20 +89,37 @@ export const promisedCall = <T>(
     getLastResult,
     stopTimeout,
     onAfterCancel = () => {},
-  }: { getLastResult: () => T; stopTimeout: () => void; onAfterCancel?: () => void },
+    onStopRepeatedCalls = () => {},
+  }: {
+    getLastResult: () => T;
+    stopTimeout: () => void;
+    onAfterCancel?: () => void;
+    onStopRepeatedCalls?: (params: { cancelablePromise: TCancelablePromise<T> }) => void;
+  },
 ): TCancelablePromise<T> => {
   let rejectOuter: (error: TReachedLimitError<T> | TCanceledError<T> | unknown) => void = () => {};
   const promise = new Promise<T>((resolve, reject) => {
     rejectOuter = reject;
     checkEnded({ resolve, reject, lastResult: getLastResult() });
   });
+  const rejectInner = () => {
+    rejectOuter(createCanceledError(getLastResult()));
+  };
 
   const cancelablePromise: TCancelablePromise<T> = promise as TCancelablePromise<T>;
 
   cancelablePromise.cancel = () => {
     stopTimeout();
-    rejectOuter(createCanceledError(getLastResult()));
+    rejectInner();
     onAfterCancel();
+  };
+
+  cancelablePromise.stopRepeatedCalls = () => {
+    // Останавливаем любые запланированные таймеры и помечаем флаг остановки.
+    // Реджект будет выполнен после завершения текущего вызова целевой функции,
+    // чтобы не прерывать его и позволить побочным эффектам завершиться.
+    stopTimeout();
+    onStopRepeatedCalls({ cancelablePromise });
   };
 
   return cancelablePromise;
@@ -114,6 +132,7 @@ export const rejectCancelablePromise = <T>(error?: Error): TCancelablePromise<T>
   const cancelablePromise: TCancelablePromise<T> = promise as TCancelablePromise<T>;
 
   cancelablePromise.cancel = () => {};
+  cancelablePromise.stopRepeatedCalls = () => {};
 
   return cancelablePromise;
 };

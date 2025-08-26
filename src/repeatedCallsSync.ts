@@ -79,7 +79,14 @@ const repeatedCallsSync = <T = unknown, B extends boolean = boolean>({
     return lastResultSaved;
   };
 
-  return promisedCall<TResult<T, B>>(checkEnded, { getLastResult, stopTimeout, onAfterCancel });
+  return promisedCall<TResult<T, B>>(checkEnded, {
+    getLastResult,
+    stopTimeout,
+    onAfterCancel,
+    onStopRepeatedCalls: ({ cancelablePromise }) => {
+      cancelablePromise.cancel();
+    },
+  });
 };
 
 export default repeatedCallsSync;

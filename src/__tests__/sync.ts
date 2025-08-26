@@ -170,4 +170,50 @@ describe('repeatedCalls', () => {
     expect(isComplete).toHaveBeenCalledTimes(2);
     expect(targetFunction).toHaveBeenCalledTimes(1);
   });
+
+  it('should stop calls when stopRepeatedCalls is called before targetFunction completes', async () => {
+    expect.assertions(7);
+
+    let testState = 0;
+
+    const targetFunctionDelayed = jest.fn(() => {
+      testState += 1;
+
+      return 42;
+    });
+
+    const isComplete = () => {
+      return testState === 2;
+    };
+
+    const promise = repeatedCalls<number>({
+      targetFunction: targetFunctionDelayed,
+      isComplete,
+      callLimit: 9999,
+      delay: 10, // Минимальная задержка для предотвращения бесконечного цикла
+    });
+
+    // В синхронной версии с задержкой stopRepeatedCalls должен остановить следующий вызов
+    promise.stopRepeatedCalls();
+
+    try {
+      await promise;
+    } catch (error) {
+      expect(hasCanceledError(error)).toBe(true);
+      expect((error as TCanceledError<number>).message).toBe('canceled');
+      expect((error as TCanceledError<number>).values?.lastResult).toBe(42);
+      expect(testState).toBe(1);
+    }
+
+    // Проверяем, что targetFunction был вызван
+    expect(targetFunctionDelayed).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    // Проверяем, что targetFunction не был вызван еще раз
+    expect(targetFunctionDelayed).toHaveBeenCalledTimes(1);
+    expect(testState).toBe(1);
+  });
 });
