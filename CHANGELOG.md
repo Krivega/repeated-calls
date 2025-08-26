@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/Krivega/repeated-calls/compare/v2.3.5...v2.4.0) (2025-08-26)
+
+### Features
+
+- add stopRepeatedCalls ([465fea8](https://github.com/Krivega/repeated-calls/commit/465fea8e34fa1e08da859d83de9f65bcec5dcffa))
+
 ### [2.3.5](https://github.com/Krivega/repeated-calls/compare/v2.3.4...v2.3.5) (2025-08-26)
 
 ### Bug Fixes
