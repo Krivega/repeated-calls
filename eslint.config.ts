@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 import nodeUrl from 'node:url';
 
 import { includeIgnoreFile } from '@eslint/compat';
