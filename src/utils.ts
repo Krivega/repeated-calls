@@ -26,7 +26,7 @@ export const validateParams = <T, B>({
 }: {
   targetFunction?: TTargetFunction<T>;
   isComplete?: TIsComplete<B>;
-}) => {
+}): { valid: true } | { valid: false; error: Error } => {
   if (!targetFunction) {
     return { valid: false, error: new Error('targetFunction is required') };
   }
